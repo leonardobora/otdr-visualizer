@@ -7,37 +7,154 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
       :root {
-        font-family: Arial, sans-serif;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        color: #1f2937;
+        background: #f3f5f7;
       }
 
       body {
         margin: 0;
-        background: whitesmoke;
-        color: black;
+        background: #f3f5f7;
       }
 
       .container {
-        max-width: 980px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 24px;
+        padding: 28px 22px 48px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
       }
 
       h1 {
-        margin-top: 0;
+        font-size: 1.9rem;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: flex-start;
+        margin-bottom: 18px;
+      }
+
+      .hero p {
+        margin-top: 8px;
+        color: #4b5563;
+        line-height: 1.5;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+      }
+
+      .pill-row {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill {
+        background: #e0f2fe;
+        color: #0f4c81;
+        font-size: 0.78rem;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+
+      .button {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 16px;
+        background: #2563eb;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .button.secondary {
+        background: white;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+      }
+
+      .link-chip {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .alerts {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 18px 0 10px;
+      }
+
+      .alert {
+        background: white;
+        border-left: 4px solid #2563eb;
+        border-radius: 12px;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      }
+
+      .alert--warning {
+        border-left-color: #f97316;
+      }
+
+      .alert--success {
+        border-left-color: #22c55e;
+      }
+
+      .alert p {
+        color: #4b5563;
+        margin-top: 4px;
+        line-height: 1.45;
+      }
+
+      .alert button {
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #6b7280;
       }
 
       .layout {
         display: grid;
-        grid-template-columns: minmax(260px, 320px) 1fr;
+        grid-template-columns: minmax(280px, 330px) 1fr;
         gap: 20px;
+        align-items: start;
       }
 
       .panel,
-      .chart-panel {
+      .chart-panel,
+      .info-panel {
         background: white;
-        border: 1px solid lightgray;
-        border-radius: 10px;
-        padding: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 18px;
+      }
+
+      .panel-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
       }
 
       .control {
@@ -47,13 +164,21 @@
       .control label,
       .control legend {
         font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         display: block;
       }
 
+      .hint {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-top: 6px;
+        line-height: 1.4;
+      }
+
       fieldset {
-        border: 1px solid silver;
-        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px;
       }
 
       .radio-group {
@@ -72,34 +197,258 @@
         width: 100%;
       }
 
+      select {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        font-weight: 600;
+      }
+
       .value-badge {
         min-width: 34px;
         text-align: right;
         font-weight: 700;
       }
 
-      #summary {
-        margin-top: 14px;
-        line-height: 1.4;
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .tag {
+        background: #fef3c7;
+        color: #92400e;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .chart-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .chart-header p {
+        color: #6b7280;
+        margin-top: 6px;
+      }
+
+      #chart {
+        width: 100%;
+        border-radius: 14px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+      }
+
+      .legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        color: #6b7280;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .legend-line {
+        width: 20px;
+        height: 3px;
+        background: #2563eb;
+        border-radius: 999px;
+      }
+
+      .legend-marker {
+        width: 10px;
+        height: 10px;
+        background: #f97316;
+        border-radius: 999px;
+      }
+
+      .summary {
+        display: grid;
+        gap: 12px;
+      }
+
+      .summary-block {
+        padding: 12px;
+        border-radius: 12px;
+        background: #f8fafc;
+      }
+
+      .summary-block h3 {
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+        color: #1f2937;
+      }
+
+      .summary-block ul {
+        padding-left: 18px;
+        margin: 0;
+        color: #4b5563;
+      }
+
+      .summary-block li {
+        margin-bottom: 4px;
+      }
+
+      .info-grid {
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+
+      .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 16px;
+        border: 1px solid #e5e7eb;
+      }
+
+      .info-card p {
+        color: #4b5563;
+        margin-top: 8px;
+        line-height: 1.5;
+      }
+
+      .info-panel {
+        margin-top: 24px;
+      }
+
+      details {
+        margin-bottom: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #f8fafc;
+      }
+
+      details summary {
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      details p {
+        margin-top: 8px;
+        color: #4b5563;
+        line-height: 1.5;
+      }
+
+      .links-list {
+        padding-left: 18px;
+        color: #2563eb;
+      }
+
+      .links-list a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+
+      .footer {
+        margin-top: 30px;
+        color: #6b7280;
+        font-size: 0.85rem;
       }
 
       .axis-label {
         font-size: 12px;
-        fill: dimgray;
+        fill: #6b7280;
+      }
+
+      .grid line {
+        stroke: #e5e7eb;
+        stroke-dasharray: 4 4;
+      }
+
+      .grid path {
+        stroke-width: 0;
+      }
+
+      .event-marker line {
+        stroke: #f97316;
+        stroke-width: 1.5;
+        stroke-dasharray: 4 4;
+      }
+
+      .event-marker circle {
+        fill: #f97316;
+      }
+
+      .event-marker text {
+        font-size: 11px;
+        fill: #92400e;
+        font-weight: 600;
       }
 
       @media (max-width: 900px) {
         .layout {
           grid-template-columns: 1fr;
         }
+
+        .hero {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .hero-actions {
+          align-items: flex-start;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Simulador OTDR para Controle de Qualidade de Fibra</h1>
+      <header class="hero">
+        <div>
+          <h1>Simulador OTDR para Qualidade e Processos em Fibra Óptica</h1>
+          <p>
+            Explore cenários reais de telecomunicações, compare perdas e reflexões e
+            entenda como processos, inspeção e características de fibra impactam a
+            curva OTDR.
+          </p>
+          <div class="pill-row">
+            <span class="pill">Engenharia de Processos</span>
+            <span class="pill">Controle de Qualidade</span>
+            <span class="pill">Características da Fibra</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button id="tipsButton" class="button" type="button">Mostrar dicas rápidas</button>
+          <a class="link-chip" href="#faq">Ir para FAQ e links úteis</a>
+        </div>
+      </header>
+
+      <div id="alerts" class="alerts" role="status" aria-live="polite"></div>
+
       <div class="layout">
         <section class="panel" aria-label="Controles de manufatura">
+          <h2 class="panel-title">Cenários e parâmetros</h2>
+          <div class="control">
+            <label for="scenario">Cenário OTDR (telecom)</label>
+            <select id="scenario"></select>
+            <p id="scenarioDescription" class="hint"></p>
+            <div class="tag-row">
+              <span id="scenarioProcess" class="tag"></span>
+              <span id="scenarioQuality" class="tag"></span>
+              <span id="scenarioFiber" class="tag"></span>
+            </div>
+          </div>
+
           <div class="control">
             <fieldset>
               <legend>Comprimento de Onda</legend>
@@ -113,15 +462,22 @@
                   1550 nm
                 </label>
               </div>
+              <p class="hint">
+                1310 nm destaca perdas lineares; 1550 nm evidencia macrocurvaturas e
+                perdas por estresse mecânico.
+              </p>
             </fieldset>
           </div>
 
           <div class="control">
-            <label for="tension">Tensão de Enrolamento</label>
+            <label for="tension">Tensão de Enrolamento no Carretel</label>
             <div class="slider-row">
               <input id="tension" type="range" min="0" max="100" value="0" />
               <span id="tensionValue" class="value-badge">0</span>
             </div>
+            <p class="hint">
+              Tensão elevada gera perdas progressivas no trecho final da fibra.
+            </p>
           </div>
 
           <div class="control">
@@ -130,21 +486,159 @@
               <input id="thermal" type="range" min="0" max="100" value="0" />
               <span id="thermalValue" class="value-badge">0</span>
             </div>
+            <p class="hint">
+              Oscilações térmicas típicas de processo geram degraus de perda em emendas.
+            </p>
           </div>
 
           <div class="control">
             <label>
               <input id="defect" type="checkbox" />
-              Inserir Bolha/Impureza no km 5
+              Inserir bolha/impureza pontual no km 5
+            </label>
+          </div>
+
+          <div class="control">
+            <label>
+              <input id="alertsEnabled" type="checkbox" checked />
+              Mostrar alertas de aprendizagem
             </label>
           </div>
         </section>
 
         <section class="chart-panel">
+          <div class="chart-header">
+            <div>
+              <h2>Traço OTDR</h2>
+              <p id="scenarioSummary"></p>
+            </div>
+            <div class="legend">
+              <div class="legend-item">
+                <span class="legend-line"></span>
+                Atenuação contínua
+              </div>
+              <div class="legend-item">
+                <span class="legend-marker"></span>
+                Evento/Reflexão
+              </div>
+            </div>
+          </div>
           <svg id="chart" role="img" aria-label="Traço OTDR"></svg>
-          <p id="summary"></p>
+          <div id="summary" class="summary">
+            <div class="summary-block">
+              <h3>Leitura rápida</h3>
+              <p id="summaryText"></p>
+            </div>
+            <div class="summary-block">
+              <h3>Eventos detectados</h3>
+              <ul id="summaryEvents"></ul>
+            </div>
+            <div class="summary-block">
+              <h3>Indicadores</h3>
+              <ul id="summaryMetrics"></ul>
+            </div>
+          </div>
         </section>
       </div>
+
+      <section class="info-grid">
+        <article class="info-card">
+          <h3>Engenharia de processos</h3>
+          <p>
+            Relacione parâmetros de torre, bobinamento e inspeção com as perdas
+            detectadas pelo OTDR. Use os sliders para simular variações de processo e
+            comparar o impacto em diferentes cenários.
+          </p>
+        </article>
+        <article class="info-card">
+          <h3>Qualidade e rastreabilidade</h3>
+          <p>
+            Avalie perdas em emendas, macrocurvaturas, conectores e splitters. Essa
+            leitura é essencial para liberar lotes e garantir a performance da rede.
+          </p>
+        </article>
+        <article class="info-card">
+          <h3>Características das fibras</h3>
+          <p>
+            Fibras G.652 apresentam menor sensibilidade a curvaturas, enquanto G.657
+            tolera dobras, mas exige atenção às reflexões e conectividade. Alterne o
+            comprimento de onda para enxergar diferenças.
+          </p>
+        </article>
+      </section>
+
+      <section id="faq" class="info-panel">
+        <h2>FAQ — OTDR em telecomunicações</h2>
+        <details>
+          <summary>O que é um OTDR e para que serve?</summary>
+          <p>
+            O OTDR (Optical Time Domain Reflectometer) mede perdas e reflexões ao longo
+            da fibra, localizando eventos como emendas, conectores, macrocurvaturas e
+            rompimentos. Ele é usado na fabricação, certificação e manutenção de redes
+            ópticas.
+          </p>
+        </details>
+        <details>
+          <summary>Como interpretar um pico refletivo?</summary>
+          <p>
+            Picos refletem descontinuidades com alto índice de reflexão, como
+            conectores sujos, quebra de fibra ou interfaces mal alinhadas. Uma reflexão
+            alta costuma vir acompanhada de perda de inserção.
+          </p>
+        </details>
+        <details>
+          <summary>Por que o OTDR muda com o comprimento de onda?</summary>
+          <p>
+            A atenuação e a sensibilidade a macrocurvaturas dependem da janela óptica.
+            Em 1310 nm as perdas lineares são mais evidentes; em 1550 nm a fibra é mais
+            sensível a dobras e estresse mecânico.
+          </p>
+        </details>
+        <details>
+          <summary>Como usar isso em processos e qualidade?</summary>
+          <p>
+            Compare o cenário base com variações de tensão, instabilidade térmica e
+            defeitos pontuais. Ajuste limites de processo e critérios de aprovação com
+            base nos eventos detectados e na perda total estimada.
+          </p>
+        </details>
+
+        <h2>Links úteis</h2>
+        <ul class="links-list">
+          <li>
+            <a href="https://www.itu.int/rec/T-REC-G.652" target="_blank" rel="noreferrer">
+              ITU-T G.652 — fibras monomodo padrão
+            </a>
+          </li>
+          <li>
+            <a href="https://www.itu.int/rec/T-REC-G.657" target="_blank" rel="noreferrer">
+              ITU-T G.657 — fibras insensíveis à curvatura
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.iec.ch/dyn/www/f?p=103:38:0::::FSP_ORG_ID,FSP_APEX_PAGE,FSP_LANG_ID:1273,23,25"
+              target="_blank"
+              rel="noreferrer"
+            >
+              IEC 61280-4-2 — métodos de teste OTDR
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.thefoa.org/tech/ref/OTDR/OTDR.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              FOA — fundamentos de OTDR
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <p class="footer">
+        Projeto standalone para aprendizado interno em Furukawa/Lightera.
+      </p>
     </div>
 
     <script>
@@ -160,26 +654,201 @@
         km4: 0.45,
         km7: 0.55
       };
-      const DEFECT = {
-        reflectionBoost: 1.2,
-        postReflectionDrop: 1.0,
-        lossStartKm: 5.03,
-        baseSampleKm: 4.98,
-        preSpikeKm: 4.99,
-        spikeKm: 5.0,
-        dropKm: 5.03
+      const DEFECT_LOSS_DB = 1.0;
+      const DEFECT_EVENT = {
+        id: 'defect',
+        type: 'reflection',
+        label: 'Bolha/impureza',
+        km: 5.0,
+        reflection: 1.2,
+        loss: DEFECT_LOSS_DB,
+        postLoss: DEFECT_LOSS_DB
       };
+      const SCENARIOS = [
+        {
+          id: 'baseline',
+          name: 'Fibra dentro da especificação',
+          description: 'Traço limpo com poucos eventos, típico de liberação de lote.',
+          process: 'Processo estável',
+          quality: 'Baixa perda',
+          fiber: 'G.652.D',
+          slopeMultiplier: 1,
+          alert: 'Cenário base: use como referência para comparar desvios de processo.',
+          events: [
+            {
+              id: 'launch-connector',
+              type: 'reflection',
+              label: 'Conector de lançamento',
+              km: 0.2,
+              reflection: 0.8,
+              loss: 0.2,
+              postLoss: 0.2
+            },
+            {
+              id: 'splice-ok',
+              type: 'loss',
+              label: 'Emenda padrão',
+              km: 2.6,
+              loss: 0.15
+            }
+          ]
+        },
+        {
+          id: 'poor-splice',
+          name: 'Emenda com alta perda',
+          description: 'Degrau de perda elevado em emenda crítica.',
+          process: 'Ajuste de fusão',
+          quality: 'Perda localizada',
+          fiber: 'G.652.D',
+          slopeMultiplier: 1.1,
+          alert: 'Emenda com perda alta: revisar parâmetros de arco e limpeza.',
+          events: [
+            {
+              id: 'bad-splice',
+              type: 'loss',
+              label: 'Emenda crítica',
+              km: 3.4,
+              loss: 0.9
+            }
+          ]
+        },
+        {
+          id: 'macro',
+          name: 'Macrocurvatura em campo',
+          description: 'Perda progressiva por dobra no trecho final da rota.',
+          process: 'Manuseio/instalação',
+          quality: 'Sensível à curvatura',
+          fiber: 'G.657.A2',
+          slopeMultiplier: 1,
+          alert: 'Macrocurvatura detectada: verificar raio mínimo e acomodação do cabo.',
+          events: [
+            {
+              id: 'macro-bend',
+              type: 'bend',
+              label: 'Macrocurvatura',
+              km: 8.3,
+              loss: 1.1
+            }
+          ]
+        },
+        {
+          id: 'dirty-connector',
+          name: 'Conector contaminado',
+          description: 'Reflexão elevada no início da fibra, típica de contaminação.',
+          process: 'Inspeção de ponta',
+          quality: 'Reflexão alta',
+          fiber: 'G.652.D',
+          slopeMultiplier: 1,
+          alert: 'Reflexão alta: limpar conector e revisar inspeção microscópica.',
+          events: [
+            {
+              id: 'dirty-connector-event',
+              type: 'reflection',
+              label: 'Conector sujo',
+              km: 0.6,
+              reflection: 1.5,
+              loss: 0.6,
+              postLoss: 0.5
+            }
+          ]
+        },
+        {
+          id: 'splitter',
+          name: 'Splitter 1x8 na rede',
+          description: 'Perda concentrada típica de distribuição FTTH.',
+          process: 'Rede óptica passiva',
+          quality: 'Atenuação alta',
+          fiber: 'G.652.D',
+          slopeMultiplier: 1,
+          alert: 'Splitter gera perda elevada: validar orçamento óptico do enlace.',
+          events: [
+            {
+              id: 'splitter-loss',
+              type: 'loss',
+              label: 'Splitter 1x8',
+              km: 5.5,
+              loss: 3.2
+            }
+          ]
+        },
+        {
+          id: 'break',
+          name: 'Rompimento total',
+          description: 'Fim abrupto da fibra com reflexão forte e queda a ruído.',
+          process: 'Manutenção crítica',
+          quality: 'Falha total',
+          fiber: 'G.652.D',
+          slopeMultiplier: 1,
+          alert: 'Fim de fibra detectado: localizar trecho rompido e acionar reparo.',
+          events: [
+            {
+              id: 'fiber-end',
+              type: 'end',
+              label: 'Fim de fibra',
+              km: 7.8,
+              reflection: 1.3,
+              loss: 6.5
+            }
+          ]
+        }
+      ];
       const MAX_DISTANCE = 10;
-      const DISTANCE_STEP = 0.1;
-      const CHART_WIDTH = 620;
-      const CHART_HEIGHT = 360;
+      const DISTANCE_STEP_KM = 0.1;
+      const CHART_WIDTH = 680;
+      const CHART_HEIGHT = 380;
+      const ALERT_AUTO_DISMISS_DURATION_MS = 12000;
+      const Y_AXIS_MIN_DB = 0;
+      const Y_AXIS_MAX_DB = 10;
+      const MIN_SIGNAL_DB = Y_AXIS_MIN_DB;
+      const USABLE_SIGNAL_THRESHOLD_DB = 3.5;
+      const REFLECTION_WINDOW_KM = 0.05;
+      const REFLECTION_SPIKE_PRE_OFFSET_KM = 0.02;
+      const REFLECTION_SPIKE_POST_OFFSET_KM = 0.04;
+      const DEFAULT_POST_REFLECTION_LOSS_DB = 0.3;
+      const MACROBEND_PROGRESSIVE_FACTOR = 0.35;
+      const FIBER_END_LOSS_RATE_DB_PER_KM = 2.2;
+      const TENSION_ALERT_THRESHOLD = 70;
+      const TENSION_RESET_THRESHOLD = 50;
+      const THERMAL_ALERT_THRESHOLD = 70;
+      const THERMAL_RESET_THRESHOLD = 50;
+      const QUICK_TIPS = [
+        'Compare o cenário base com variações de processo para entender o impacto na perda total.',
+        'Conectores sujos geram reflexões fortes logo no início da curva.',
+        'Use 1310 nm para destacar perdas lineares e 1550 nm para macrocurvaturas.',
+        'Degraus de perda indicam emendas, splitters ou eventos localizados.'
+      ];
 
       const state = {
+        scenarioId: 'baseline',
         wavelength: '1550',
         tension: 0,
         thermal: 0,
-        defect: false
+        defect: false,
+        alertsEnabled: true,
+        notices: {
+          tension: false,
+          thermal: false
+        }
       };
+
+      const scenarioSelect = document.querySelector('#scenario');
+      const scenarioDescription = document.querySelector('#scenarioDescription');
+      const scenarioProcess = document.querySelector('#scenarioProcess');
+      const scenarioQuality = document.querySelector('#scenarioQuality');
+      const scenarioFiber = document.querySelector('#scenarioFiber');
+      const scenarioSummary = document.querySelector('#scenarioSummary');
+      const summaryText = document.querySelector('#summaryText');
+      const summaryEvents = document.querySelector('#summaryEvents');
+      const summaryMetrics = document.querySelector('#summaryMetrics');
+      const alertsContainer = document.querySelector('#alerts');
+
+      SCENARIOS.forEach((scenario) => {
+        const option = document.createElement('option');
+        option.value = scenario.id;
+        option.textContent = scenario.name;
+        scenarioSelect.appendChild(option);
+      });
+      scenarioSelect.value = state.scenarioId;
 
       const svg = d3
         .select('#chart')
@@ -187,7 +856,7 @@
         .attr('height', CHART_HEIGHT);
       svg.append('title').text('Traço OTDR de potência óptica por distância');
 
-      const margin = { top: 20, right: 20, bottom: 48, left: 58 };
+      const margin = { top: 24, right: 20, bottom: 48, left: 58 };
       const innerWidth = CHART_WIDTH - margin.left - margin.right;
       const innerHeight = CHART_HEIGHT - margin.top - margin.bottom;
 
@@ -196,14 +865,19 @@
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
       const xScale = d3.scaleLinear().domain([0, MAX_DISTANCE]).range([0, innerWidth]);
-      const yScale = d3.scaleLinear().domain([4, 10]).range([innerHeight, 0]);
+      const yScale = d3.scaleLinear().domain([Y_AXIS_MIN_DB, Y_AXIS_MAX_DB]).range([innerHeight, 0]);
+
+      g
+        .append('g')
+        .attr('class', 'grid')
+        .call(d3.axisLeft(yScale).ticks(6).tickSize(-innerWidth).tickFormat(''));
 
       g
         .append('g')
         .attr('transform', `translate(0,${innerHeight})`)
         .call(d3.axisBottom(xScale).ticks(10));
 
-      g.append('g').call(d3.axisLeft(yScale).ticks(7));
+      g.append('g').call(d3.axisLeft(yScale).ticks(6));
 
       g.append('text')
         .attr('class', 'axis-label')
@@ -223,17 +897,33 @@
       const linePath = g
         .append('path')
         .attr('fill', 'none')
-        .attr('stroke', 'steelblue')
+        .attr('stroke', '#2563eb')
         .attr('stroke-width', 2.6)
         .attr('stroke-linejoin', 'round');
+
+      const markerLayer = g.append('g').attr('class', 'event-layer');
 
       const line = d3
         .line()
         .x((d) => xScale(d.x))
         .y((d) => yScale(d.y));
 
+      function getScenario() {
+        return SCENARIOS.find((scenario) => scenario.id === state.scenarioId) || SCENARIOS[0];
+      }
+
+      function getActiveEvents() {
+        const scenario = getScenario();
+        const events = [...scenario.events];
+        if (state.defect) {
+          events.push(DEFECT_EVENT);
+        }
+        return events;
+      }
+
       function computePowerAtDistance(x) {
-        const baseSlope = ATTENUATION_SLOPES[state.wavelength];
+        const scenario = getScenario();
+        const baseSlope = ATTENUATION_SLOPES[state.wavelength] * scenario.slopeMultiplier;
         let y = 10 - baseSlope * x;
 
         if (x >= 4) {
@@ -250,88 +940,294 @@
           y -= (state.tension / 100) * sensitivity * normalized * normalized;
         }
 
-        if (state.defect && x >= DEFECT.lossStartKm) {
-          y -= DEFECT.postReflectionDrop;
-        }
+        getActiveEvents().forEach((event) => {
+          if (event.type === 'loss' && x >= event.km) {
+            y -= event.loss;
+          }
 
-        return y;
+          if (event.type === 'bend' && x >= event.km) {
+            y -= event.loss * (1 + (x - event.km) * MACROBEND_PROGRESSIVE_FACTOR);
+          }
+
+          if (event.type === 'reflection' && event.loss && x >= event.km) {
+            y -= event.loss;
+          }
+
+          if (event.type === 'end' && x >= event.km) {
+            y -= event.loss + (x - event.km) * FIBER_END_LOSS_RATE_DB_PER_KM;
+          }
+        });
+
+        return Math.max(MIN_SIGNAL_DB, y);
+      }
+
+      function addReflectionSpike(points, event) {
+        const preKm = Math.max(0, event.km - REFLECTION_SPIKE_PRE_OFFSET_KM);
+        const postKm = Math.min(MAX_DISTANCE, event.km + REFLECTION_SPIKE_POST_OFFSET_KM);
+        const baseBefore = computePowerAtDistance(preKm);
+        points.push({ x: preKm, y: baseBefore });
+        points.push({ x: event.km, y: baseBefore + event.reflection });
+        points.push({
+          x: postKm,
+          y: baseBefore - (event.postLoss || event.loss || DEFAULT_POST_REFLECTION_LOSS_DB)
+        });
       }
 
       function generateTrace() {
         const points = [];
-        const totalSteps = MAX_DISTANCE / DISTANCE_STEP;
+        const totalSteps = MAX_DISTANCE / DISTANCE_STEP_KM;
         for (let i = 0; i <= totalSteps; i += 1) {
-          const x = i * DISTANCE_STEP;
+          const x = Number((i * DISTANCE_STEP_KM).toFixed(2));
           points.push({ x, y: computePowerAtDistance(x) });
         }
 
-        if (state.defect) {
-          const baseBeforeDefect = computePowerAtDistance(DEFECT.baseSampleKm);
-          points.push({ x: DEFECT.preSpikeKm, y: baseBeforeDefect });
-          points.push({ x: DEFECT.spikeKm, y: baseBeforeDefect + DEFECT.reflectionBoost });
-          points.push({ x: DEFECT.dropKm, y: baseBeforeDefect - DEFECT.postReflectionDrop });
-          points.sort((a, b) => a.x - b.x);
-        }
+        const events = getActiveEvents();
+        const reflectionEvents = events.filter((event) => event.reflection);
+        const filteredPoints = points.filter(
+          (point) =>
+            !reflectionEvents.some((event) => Math.abs(point.x - event.km) <= REFLECTION_WINDOW_KM)
+        );
 
-        return points;
+        reflectionEvents.forEach((event) => addReflectionSpike(filteredPoints, event));
+
+        filteredPoints.sort((a, b) => a.x - b.x);
+        return filteredPoints;
       }
 
-      function buildSummary() {
+      function formatEventLabel(event) {
+        const typeLabel =
+          event.type === 'reflection'
+            ? 'Reflexão'
+            : event.type === 'end'
+            ? 'Fim de fibra'
+            : event.type === 'bend'
+            ? 'Macrocurvatura'
+            : 'Perda localizada';
+        return `${event.label} · ${event.km.toFixed(2)} km (${typeLabel})`;
+      }
+
+      function buildParameterSummary() {
         const wavelengthText =
           state.wavelength === '1310'
-            ? '1310 nm selecionado: atenuação linear mais acentuada ao longo da fibra.'
-            : '1550 nm selecionado: atenuação linear mais suave, porém maior sensibilidade a macrocurvaturas.';
+            ? '1310 nm evidencia perdas lineares e emendas.'
+            : '1550 nm evidencia macrocurvaturas e estresse mecânico.';
 
         const tensionText =
           state.tension === 0
-            ? 'Sem tensão de enrolamento adicional no carretel.'
-            : `Tensão em ${state.tension}: há penalidade progressiva entre km 8 e 10${
-                state.wavelength === '1550' ? ', com queda profunda típica em 1550 nm.' : '.'
-              }`;
+            ? 'Sem tensão adicional no carretel.'
+            : `Tensão em ${state.tension}: perdas progressivas após o km 8.`;
 
         const thermalText =
           state.thermal === 0
-            ? 'Torre estável: sem perdas em degrau por oscilação térmica.'
-            : `Instabilidade térmica em ${state.thermal}: perdas em degrau visíveis próximas dos km 4 e 7.`;
+            ? 'Torre estável sem degraus térmicos.'
+            : `Instabilidade térmica em ${state.thermal}: degraus próximos dos km 4 e 7.`;
 
         const defectText = state.defect
-          ? 'Defeito ativado no km 5: pico refletivo seguido de queda abrupta de potência.'
-          : 'Sem bolha/impureza inserida no km 5.';
+          ? 'Defeito pontual inserido com reflexão destacada.'
+          : 'Sem defeito pontual adicional.';
 
         return `${wavelengthText} ${tensionText} ${thermalText} ${defectText}`;
+      }
+
+      function renderSummary(data) {
+        const scenario = getScenario();
+        scenarioSummary.textContent = `${scenario.name} · ${scenario.process}`;
+        summaryText.textContent = `${scenario.description} ${buildParameterSummary()}`;
+
+        summaryEvents.innerHTML = '';
+        const events = getActiveEvents();
+        if (events.length === 0) {
+          summaryEvents.innerHTML = '<li>Nenhum evento adicional detectado.</li>';
+        } else {
+          events.forEach((event) => {
+            const item = document.createElement('li');
+            item.textContent = formatEventLabel(event);
+            summaryEvents.appendChild(item);
+          });
+        }
+
+        const totalLoss = Math.max(0, data[0].y - data[data.length - 1].y).toFixed(2);
+        const averageLoss = (totalLoss / MAX_DISTANCE).toFixed(2);
+        const usablePoint = data.slice().reverse().find((point) => point.y > USABLE_SIGNAL_THRESHOLD_DB);
+        const usableDistance = usablePoint ? usablePoint.x : 0;
+        const baseSlope = ATTENUATION_SLOPES[state.wavelength] * scenario.slopeMultiplier;
+
+        summaryMetrics.innerHTML = '';
+        [
+          `Perda total estimada: ${totalLoss} dB`,
+          `Atenuação média: ${averageLoss} dB/km`,
+          `Alcance útil acima de ${USABLE_SIGNAL_THRESHOLD_DB.toFixed(1)} dB: ${usableDistance.toFixed(1)} km`,
+          `Inclinação base: ${baseSlope.toFixed(2)} dB/km`
+        ].forEach((metric) => {
+          const item = document.createElement('li');
+          item.textContent = metric;
+          summaryMetrics.appendChild(item);
+        });
+      }
+
+      function renderMarkers() {
+        const markerData = getActiveEvents();
+        const markers = markerLayer.selectAll('g.event-marker').data(markerData, (d) => d.id);
+        const markersEnter = markers.enter().append('g').attr('class', 'event-marker');
+        markersEnter.append('line');
+        markersEnter.append('circle');
+        markersEnter.append('text');
+
+        const markersAll = markersEnter.merge(markers);
+        markersAll.attr('transform', (d) => `translate(${xScale(d.km)},0)`);
+        markersAll
+          .select('line')
+          .attr('y1', 0)
+          .attr('y2', innerHeight);
+        markersAll
+          .select('circle')
+          .attr('cy', (d) => yScale(computePowerAtDistance(d.km)))
+          .attr('r', 4);
+        markersAll
+          .select('text')
+          .attr('x', 6)
+          .attr('y', 14)
+          .text((d) => d.label);
+
+        markers.exit().remove();
+      }
+
+      function updateScenarioDetails() {
+        const scenario = getScenario();
+        scenarioDescription.textContent = scenario.description;
+        scenarioProcess.textContent = scenario.process;
+        scenarioQuality.textContent = scenario.quality;
+        scenarioFiber.textContent = scenario.fiber;
+      }
+
+      function pushAlert({ title, message, type = 'info' }) {
+        if (!state.alertsEnabled) {
+          return;
+        }
+        const alert = document.createElement('div');
+        alert.className = `alert alert--${type}`;
+        alert.innerHTML = `
+          <div>
+            <strong>${title}</strong>
+            <p>${message}</p>
+          </div>
+          <button type="button" aria-label="Fechar alerta">×</button>
+        `;
+        const closeButton = alert.querySelector('button');
+        closeButton.addEventListener('click', () => alert.remove());
+        alertsContainer.prepend(alert);
+        setTimeout(() => {
+          if (alert.isConnected) {
+            alert.remove();
+          }
+        }, ALERT_AUTO_DISMISS_DURATION_MS);
       }
 
       function render() {
         const data = generateTrace();
         linePath.datum(data).attr('d', line);
+        renderMarkers();
+        renderSummary(data);
 
-        d3.select('#summary').text(buildSummary());
-
-        d3.select('#tensionValue').text(state.tension);
-        d3.select('#thermalValue').text(state.thermal);
+        document.querySelector('#tensionValue').textContent = state.tension;
+        document.querySelector('#thermalValue').textContent = state.thermal;
       }
+
+      scenarioSelect.addEventListener('change', (event) => {
+        state.scenarioId = event.target.value;
+        updateScenarioDetails();
+        render();
+        const scenario = getScenario();
+        pushAlert({
+          title: 'Cenário atualizado',
+          message: scenario.alert,
+          type: 'success'
+        });
+      });
 
       d3.selectAll('input[name="wavelength"]').on('change', (event) => {
         state.wavelength = event.target.value;
         render();
+        pushAlert({
+          title: 'Comprimento de onda atualizado',
+          message: state.wavelength === '1310'
+            ? 'Use 1310 nm para evidenciar perdas lineares e emendas.'
+            : 'Use 1550 nm para visualizar macrocurvaturas e estresse mecânico.',
+          type: 'info'
+        });
       });
 
       d3.select('#tension').on('input', (event) => {
         state.tension = Number(event.target.value);
+        if (state.tension >= TENSION_ALERT_THRESHOLD && !state.notices.tension) {
+          state.notices.tension = true;
+          pushAlert({
+            title: 'Tensão elevada',
+            message: 'Valores altos indicam risco de macrocurvatura no trecho final.',
+            type: 'warning'
+          });
+        }
+        if (state.tension < TENSION_RESET_THRESHOLD) {
+          state.notices.tension = false;
+        }
         render();
       });
 
       d3.select('#thermal').on('input', (event) => {
         state.thermal = Number(event.target.value);
+        if (state.thermal >= THERMAL_ALERT_THRESHOLD && !state.notices.thermal) {
+          state.notices.thermal = true;
+          pushAlert({
+            title: 'Instabilidade térmica alta',
+            message: 'Degraus de perda indicam variação no processo de estiramento.',
+            type: 'warning'
+          });
+        }
+        if (state.thermal < THERMAL_RESET_THRESHOLD) {
+          state.notices.thermal = false;
+        }
         render();
       });
 
       d3.select('#defect').on('change', (event) => {
         state.defect = event.target.checked;
         render();
+        pushAlert({
+          title: 'Evento pontual',
+          message: state.defect
+            ? 'Bolha/impureza adicionada no km 5 para simular reflexão de microdefeito.'
+            : 'Evento pontual removido do traço.',
+          type: 'info'
+        });
       });
 
+      d3.select('#alertsEnabled').on('change', (event) => {
+        state.alertsEnabled = event.target.checked;
+        if (state.alertsEnabled) {
+          pushAlert({
+            title: 'Alertas habilitados',
+            message: 'Você receberá dicas contextuais durante a simulação.',
+            type: 'success'
+          });
+        }
+      });
+
+      document.querySelector('#tipsButton').addEventListener('click', () => {
+        const tipsMessage = QUICK_TIPS.map((tip, index) => `${index + 1}) ${tip}`).join('<br>');
+        pushAlert({
+          title: 'Dicas rápidas',
+          message: tipsMessage,
+          type: 'info'
+        });
+      });
+
+      updateScenarioDetails();
       render();
+      pushAlert({
+        title: 'Bem-vindo ao simulador OTDR',
+        message: 'Escolha um cenário real de telecom e ajuste os parâmetros para aprender com os alertas.',
+        type: 'success'
+      });
     </script>
   </body>
 </html>
