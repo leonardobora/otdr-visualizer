@@ -187,11 +187,9 @@
         .attr('height', CHART_HEIGHT);
       svg.append('title').text('Traço OTDR de potência óptica por distância');
 
-      const width = CHART_WIDTH;
-      const height = CHART_HEIGHT;
       const margin = { top: 20, right: 20, bottom: 48, left: 58 };
-      const innerWidth = width - margin.left - margin.right;
-      const innerHeight = height - margin.top - margin.bottom;
+      const innerWidth = CHART_WIDTH - margin.left - margin.right;
+      const innerHeight = CHART_HEIGHT - margin.top - margin.bottom;
 
       const g = svg
         .append('g')
@@ -200,12 +198,12 @@
       const xScale = d3.scaleLinear().domain([0, MAX_DISTANCE]).range([0, innerWidth]);
       const yScale = d3.scaleLinear().domain([4, 10]).range([innerHeight, 0]);
 
-      const xAxisGroup = g
+      g
         .append('g')
         .attr('transform', `translate(0,${innerHeight})`)
         .call(d3.axisBottom(xScale).ticks(10));
 
-      const yAxisGroup = g.append('g').call(d3.axisLeft(yScale).ticks(7));
+      g.append('g').call(d3.axisLeft(yScale).ticks(7));
 
       g.append('text')
         .attr('class', 'axis-label')
@@ -261,7 +259,7 @@
 
       function generateTrace() {
         const points = [];
-        const totalSteps = Math.ceil(MAX_DISTANCE / DISTANCE_STEP);
+        const totalSteps = MAX_DISTANCE / DISTANCE_STEP;
         for (let i = 0; i <= totalSteps; i += 1) {
           const x = i * DISTANCE_STEP;
           points.push({ x, y: computePowerAtDistance(x) });
@@ -311,9 +309,6 @@
 
         d3.select('#tensionValue').text(state.tension);
         d3.select('#thermalValue').text(state.thermal);
-
-        xAxisGroup.call(d3.axisBottom(xScale).ticks(10));
-        yAxisGroup.call(d3.axisLeft(yScale).ticks(7));
       }
 
       d3.selectAll('input[name="wavelength"]').on('change', (event) => {
