@@ -307,6 +307,10 @@
         margin-bottom: 4px;
       }
 
+      .is-hidden {
+        display: none;
+      }
+
       .info-grid {
         margin-top: 24px;
         display: grid;
@@ -425,6 +429,7 @@
             <span class="pill">Engenharia de Processos</span>
             <span class="pill">Controle de Qualidade</span>
             <span class="pill">Características da Fibra</span>
+            <span class="pill">Teste 16 fibras</span>
           </div>
         </div>
         <div class="hero-actions">
@@ -447,6 +452,15 @@
               <span id="scenarioQuality" class="tag"></span>
               <span id="scenarioFiber" class="tag"></span>
             </div>
+          </div>
+
+          <div id="fiberControl" class="control is-hidden">
+            <label for="fiberChannel">Fibra em teste (1–16)</label>
+            <select id="fiberChannel"></select>
+            <p class="hint">
+              Use este seletor no cenário "Cabo 16 fibras em teste" para analisar cada fibra
+              individualmente.
+            </p>
           </div>
 
           <div class="control">
@@ -537,6 +551,11 @@
               <h3>Indicadores</h3>
               <ul id="summaryMetrics"></ul>
             </div>
+            <div class="summary-block">
+              <h3>Conectividade 16 fibras</h3>
+              <p id="bundleStatus"></p>
+              <ul id="bundleNotes"></ul>
+            </div>
           </div>
         </section>
       </div>
@@ -565,6 +584,30 @@
             comprimento de onda para enxergar diferenças.
           </p>
         </article>
+      </section>
+
+      <section id="bundle-guide" class="info-panel">
+        <h2>Guia rápido — teste de conectividade em cabo 16 fibras</h2>
+        <p>
+          Este roteiro ajuda a comparar as 16 fibras do cabo em laboratório usando OTDR.
+          Ele foi pensado para integração de novos analistas e para padronizar o relatório.
+        </p>
+        <ol>
+          <li>Prepare o launch cable e o receive cable com conector limpo e inspeção visual.</li>
+          <li>Padronize o comprimento de onda (1310 nm ou 1550 nm) e a faixa do OTDR.</li>
+          <li>Teste fibra por fibra, registrando perda total, eventos e distância do fim.</li>
+          <li>Use a seleção "Fibra em teste" para comparar traços e localizar desvios.</li>
+          <li>Se houver falha, valide o patching e repita a medição antes de abrir reparo.</li>
+        </ol>
+        <h3>Principais motivos de falha de conexão</h3>
+        <ul>
+          <li>Conector contaminado ou com endface danificado gerando reflexão alta.</li>
+          <li>Emenda (splice) com loss elevada por alinhamento ou limpeza inadequada.</li>
+          <li>Macrocurvatura no cabo, especialmente em curvas fechadas e tensionamento alto.</li>
+          <li>Rompimento parcial ou microfissura que derruba o sinal antes do fim esperado.</li>
+          <li>Swap de fibras no patching (fibra 3 conectada na posição 4, por exemplo).</li>
+          <li>Mismatch de polimento (UPC/APC) causando reflexão e perda extra.</li>
+        </ul>
       </section>
 
       <section id="faq" class="info-panel">
@@ -637,7 +680,7 @@
       </section>
 
       <p class="footer">
-        Projeto standalone para aprendizado interno em Furukawa/Lightera.
+        Projeto standalone para aprendizado e treinamento em fibra óptica.
       </p>
     </div>
 
@@ -664,6 +707,143 @@
         loss: DEFECT_LOSS_DB,
         postLoss: DEFECT_LOSS_DB
       };
+      const FIBER_BUNDLE = [
+        {
+          id: 1,
+          status: 'Aprovada',
+          notes: ['Perda total dentro do esperado.', 'Sem reflexões críticas.'],
+          events: []
+        },
+        {
+          id: 2,
+          status: 'Aprovada',
+          notes: ['Traço limpo e uniforme.', 'Atenuação contínua estável.'],
+          events: []
+        },
+        {
+          id: 3,
+          status: 'Falha',
+          reason: 'Conector contaminado no início do enlace.',
+          notes: ['Reflexão elevada antes do km 1.', 'Realizar limpeza e reinspeção.'],
+          events: [
+            {
+              id: 'bundle-dirty-connector',
+              type: 'reflection',
+              label: 'Conector sujo',
+              km: 0.4,
+              reflection: 1.4,
+              loss: 0.5,
+              postLoss: 0.4
+            }
+          ]
+        },
+        {
+          id: 4,
+          status: 'Aprovada',
+          notes: ['Conector de lançamento estável.', 'Sem perda localizada.'],
+          events: []
+        },
+        {
+          id: 5,
+          status: 'Aprovada',
+          notes: ['Perdas dentro do orçamento.', 'Sem alerta crítico.'],
+          events: []
+        },
+        {
+          id: 6,
+          status: 'Aprovada',
+          notes: ['Sem descontinuidades relevantes.', 'Curva consistente.'],
+          events: []
+        },
+        {
+          id: 7,
+          status: 'Falha',
+          reason: 'Emenda (splice) com loss acima do limite.',
+          notes: ['Degrau de perda próximo do km 3.', 'Refazer emenda e rever parâmetros.'],
+          events: [
+            {
+              id: 'bundle-bad-splice',
+              type: 'loss',
+              label: 'Emenda crítica',
+              km: 3.2,
+              loss: 0.85
+            }
+          ]
+        },
+        {
+          id: 8,
+          status: 'Aprovada',
+          notes: ['Macrocurvaturas ausentes.', 'Sem falhas visíveis.'],
+          events: []
+        },
+        {
+          id: 9,
+          status: 'Aprovada',
+          notes: ['Traço homogêneo.', 'Sem eventos adicionais.'],
+          events: []
+        },
+        {
+          id: 10,
+          status: 'Aprovada',
+          notes: ['Atenuação compatível.', 'Sem reflexão inesperada.'],
+          events: []
+        },
+        {
+          id: 11,
+          status: 'Aprovada',
+          notes: ['Curva OTDR estável.', 'Fim de fibra dentro do range.'],
+          events: []
+        },
+        {
+          id: 12,
+          status: 'Falha',
+          reason: 'Macrocurvatura próxima ao final do cabo.',
+          notes: ['Perda progressiva após o km 8.', 'Verificar acomodação do cabo.'],
+          events: [
+            {
+              id: 'bundle-macro',
+              type: 'bend',
+              label: 'Macrocurvatura',
+              km: 8.1,
+              loss: 1.0
+            }
+          ]
+        },
+        {
+          id: 13,
+          status: 'Aprovada',
+          notes: ['Sem eventos críticos.', 'Perda total baixa.'],
+          events: []
+        },
+        {
+          id: 14,
+          status: 'Aprovada',
+          notes: ['Sem anomalias detectadas.', 'Curva dentro da especificação.'],
+          events: []
+        },
+        {
+          id: 15,
+          status: 'Falha',
+          reason: 'Rompimento antes do fim do cabo.',
+          notes: ['Fim abrupto do sinal.', 'Inspecionar trecho para reparo.'],
+          events: [
+            {
+              id: 'bundle-break',
+              type: 'end',
+              label: 'Rompimento',
+              km: 6.9,
+              reflection: 1.2,
+              loss: 6.3
+            }
+          ]
+        },
+        {
+          id: 16,
+          status: 'Aprovada',
+          notes: ['Sem perdas críticas.', 'Conector final estável.'],
+          events: []
+        }
+      ];
       const SCENARIOS = [
         {
           id: 'baseline',
@@ -690,6 +870,27 @@
               label: 'Emenda padrão',
               km: 2.6,
               loss: 0.15
+            }
+          ]
+        },
+        {
+          id: 'bundle-16',
+          name: 'Cabo 16 fibras em teste',
+          description: 'Comparação rápida entre fibras para validar conectividade do cabo.',
+          process: 'Teste de conectividade',
+          quality: 'Mapa de falhas',
+          fiber: 'Cabo 16F',
+          slopeMultiplier: 1,
+          alert: 'Selecione a fibra para simular o traço e checar eventos críticos.',
+          events: [
+            {
+              id: 'bundle-launch',
+              type: 'reflection',
+              label: 'Conector de lançamento',
+              km: 0.2,
+              reflection: 0.8,
+              loss: 0.2,
+              postLoss: 0.2
             }
           ]
         },
@@ -815,7 +1016,8 @@
         'Compare o cenário base com variações de processo para entender o impacto na perda total.',
         'Conectores sujos geram reflexões fortes logo no início da curva.',
         'Use 1310 nm para destacar perdas lineares e 1550 nm para macrocurvaturas.',
-        'Degraus de perda indicam emendas, splitters ou eventos localizados.'
+        'Degraus de perda indicam emendas, splitters ou eventos localizados.',
+        'No cenário 16 fibras, alterne a seleção para encontrar padrões de falha.'
       ];
 
       const state = {
@@ -824,6 +1026,7 @@
         tension: 0,
         thermal: 0,
         defect: false,
+        fiberChannel: 1,
         alertsEnabled: true,
         notices: {
           tension: false,
@@ -832,6 +1035,8 @@
       };
 
       const scenarioSelect = document.querySelector('#scenario');
+      const fiberControl = document.querySelector('#fiberControl');
+      const fiberSelect = document.querySelector('#fiberChannel');
       const scenarioDescription = document.querySelector('#scenarioDescription');
       const scenarioProcess = document.querySelector('#scenarioProcess');
       const scenarioQuality = document.querySelector('#scenarioQuality');
@@ -840,6 +1045,8 @@
       const summaryText = document.querySelector('#summaryText');
       const summaryEvents = document.querySelector('#summaryEvents');
       const summaryMetrics = document.querySelector('#summaryMetrics');
+      const bundleStatus = document.querySelector('#bundleStatus');
+      const bundleNotes = document.querySelector('#bundleNotes');
       const alertsContainer = document.querySelector('#alerts');
 
       SCENARIOS.forEach((scenario) => {
@@ -849,6 +1056,14 @@
         scenarioSelect.appendChild(option);
       });
       scenarioSelect.value = state.scenarioId;
+
+      FIBER_BUNDLE.forEach((fiber) => {
+        const option = document.createElement('option');
+        option.value = fiber.id;
+        option.textContent = `Fibra ${fiber.id}`;
+        fiberSelect.appendChild(option);
+      });
+      fiberSelect.value = state.fiberChannel;
 
       const svg = d3
         .select('#chart')
@@ -912,9 +1127,17 @@
         return SCENARIOS.find((scenario) => scenario.id === state.scenarioId) || SCENARIOS[0];
       }
 
+      function getActiveFiber() {
+        return FIBER_BUNDLE.find((fiber) => fiber.id === state.fiberChannel) || FIBER_BUNDLE[0];
+      }
+
       function getActiveEvents() {
         const scenario = getScenario();
         const events = [...scenario.events];
+        if (scenario.id === 'bundle-16') {
+          const fiber = getActiveFiber();
+          events.push(...(fiber.events || []));
+        }
         if (state.defect) {
           events.push(DEFECT_EVENT);
         }
@@ -1031,7 +1254,9 @@
 
       function renderSummary(data) {
         const scenario = getScenario();
-        scenarioSummary.textContent = `${scenario.name} · ${scenario.process}`;
+        const fiberSuffix =
+          scenario.id === 'bundle-16' ? ` · Fibra ${getActiveFiber().id}` : '';
+        scenarioSummary.textContent = `${scenario.name} · ${scenario.process}${fiberSuffix}`;
         summaryText.textContent = `${scenario.description} ${buildParameterSummary()}`;
 
         summaryEvents.innerHTML = '';
@@ -1063,6 +1288,44 @@
           item.textContent = metric;
           summaryMetrics.appendChild(item);
         });
+      }
+
+      function renderBundleStatus() {
+        if (!bundleStatus || !bundleNotes) {
+          return;
+        }
+        bundleNotes.innerHTML = '';
+        const scenario = getScenario();
+        if (scenario.id !== 'bundle-16') {
+          bundleStatus.textContent =
+            'Selecione o cenário "Cabo 16 fibras em teste" para visualizar o mapa.';
+          return;
+        }
+        const fiber = getActiveFiber();
+        bundleStatus.textContent = `Fibra ${fiber.id} — ${fiber.status}`;
+        const notes = [];
+        if (fiber.reason) {
+          notes.push(`Motivo principal: ${fiber.reason}`);
+        }
+        if (fiber.notes && fiber.notes.length) {
+          notes.push(...fiber.notes);
+        }
+        if (notes.length === 0) {
+          notes.push('Sem observações adicionais.');
+        }
+        notes.forEach((note) => {
+          const item = document.createElement('li');
+          item.textContent = note;
+          bundleNotes.appendChild(item);
+        });
+      }
+
+      function updateFiberControlVisibility() {
+        if (!fiberControl) {
+          return;
+        }
+        const isBundle = getScenario().id === 'bundle-16';
+        fiberControl.classList.toggle('is-hidden', !isBundle);
       }
 
       function renderMarkers() {
@@ -1128,6 +1391,8 @@
         linePath.datum(data).attr('d', line);
         renderMarkers();
         renderSummary(data);
+        renderBundleStatus();
+        updateFiberControlVisibility();
 
         document.querySelector('#tensionValue').textContent = state.tension;
         document.querySelector('#thermalValue').textContent = state.thermal;
@@ -1143,6 +1408,18 @@
           message: scenario.alert,
           type: 'success'
         });
+      });
+
+      fiberSelect.addEventListener('change', (event) => {
+        state.fiberChannel = Number(event.target.value);
+        render();
+        if (getScenario().id === 'bundle-16') {
+          pushAlert({
+            title: 'Fibra selecionada',
+            message: `Visualizando a Fibra ${state.fiberChannel} no cabo 16F.`,
+            type: 'info'
+          });
+        }
       });
 
       d3.selectAll('input[name="wavelength"]').on('change', (event) => {
