@@ -795,8 +795,14 @@
       const DISTANCE_STEP = 0.05;
       const CHART_WIDTH = 680;
       const CHART_HEIGHT = 380;
-      const ALERT_TIMEOUT = 12000;
+      const ALERT_TIMEOUT_MS = 12000;
       const NOISE_FLOOR = 0.5;
+      const USABLE_SIGNAL_THRESHOLD_DB = 3.5;
+      const REFLECTION_WINDOW_KM = 0.05;
+      const TENSION_ALERT_THRESHOLD = 70;
+      const TENSION_RESET_THRESHOLD = 50;
+      const THERMAL_ALERT_THRESHOLD = 70;
+      const THERMAL_RESET_THRESHOLD = 50;
 
       const state = {
         scenarioId: 'baseline',
@@ -828,6 +834,7 @@
         option.textContent = scenario.name;
         scenarioSelect.appendChild(option);
       });
+      scenarioSelect.value = state.scenarioId;
 
       const svg = d3
         .select('#chart')
@@ -957,17 +964,17 @@
           points.push({ x, y: computePowerAtDistance(x) });
         }
 
-        getActiveEvents()
-          .filter((event) => event.type === 'reflection' && event.reflection)
-          .forEach((event) => addReflectionSpike(points, event));
+        const events = getActiveEvents();
+        const reflectionEvents = events.filter((event) => event.reflection);
+        const filteredPoints = points.filter(
+          (point) =>
+            !reflectionEvents.some((event) => Math.abs(point.x - event.km) <= REFLECTION_WINDOW_KM)
+        );
 
-        const endEvent = getActiveEvents().find((event) => event.type === 'end' && event.reflection);
-        if (endEvent) {
-          addReflectionSpike(points, endEvent);
-        }
+        reflectionEvents.forEach((event) => addReflectionSpike(filteredPoints, event));
 
-        points.sort((a, b) => a.x - b.x);
-        return points;
+        filteredPoints.sort((a, b) => a.x - b.x);
+        return filteredPoints;
       }
 
       function formatEventLabel(event) {
@@ -1024,18 +1031,15 @@
 
         const totalLoss = Math.max(0, data[0].y - data[data.length - 1].y).toFixed(2);
         const averageLoss = (totalLoss / MAX_DISTANCE).toFixed(2);
-        const usableDistanceIndex = data
-          .slice()
-          .reverse()
-          .findIndex((point) => point.y > 3.5);
-        const usableDistance = usableDistanceIndex === -1 ? 0 : MAX_DISTANCE - usableDistanceIndex * DISTANCE_STEP;
+        const usablePoint = data.slice().reverse().find((point) => point.y > USABLE_SIGNAL_THRESHOLD_DB);
+        const usableDistance = usablePoint ? usablePoint.x : 0;
         const baseSlope = ATTENUATION_SLOPES[state.wavelength] * scenario.slopeMultiplier;
 
         summaryMetrics.innerHTML = '';
         [
           `Perda total estimada: ${totalLoss} dB`,
           `Atenuação média: ${averageLoss} dB/km`,
-          `Alcance útil acima de 3,5 dB: ${usableDistance.toFixed(1)} km`,
+          `Alcance útil acima de ${USABLE_SIGNAL_THRESHOLD_DB.toFixed(1)} dB: ${usableDistance.toFixed(1)} km`,
           `Inclinação base: ${baseSlope.toFixed(2)} dB/km`
         ].forEach((metric) => {
           const item = document.createElement('li');
@@ -1099,7 +1103,7 @@
           if (alert.isConnected) {
             alert.remove();
           }
-        }, ALERT_TIMEOUT);
+        }, ALERT_TIMEOUT_MS);
       }
 
       function render() {
@@ -1138,7 +1142,7 @@
 
       d3.select('#tension').on('input', (event) => {
         state.tension = Number(event.target.value);
-        if (state.tension >= 70 && !state.notices.tension) {
+        if (state.tension >= TENSION_ALERT_THRESHOLD && !state.notices.tension) {
           state.notices.tension = true;
           pushAlert({
             title: 'Tensão elevada',
@@ -1146,7 +1150,7 @@
             type: 'warning'
           });
         }
-        if (state.tension < 50) {
+        if (state.tension < TENSION_RESET_THRESHOLD) {
           state.notices.tension = false;
         }
         render();
@@ -1154,7 +1158,7 @@
 
       d3.select('#thermal').on('input', (event) => {
         state.thermal = Number(event.target.value);
-        if (state.thermal >= 70 && !state.notices.thermal) {
+        if (state.thermal >= THERMAL_ALERT_THRESHOLD && !state.notices.thermal) {
           state.notices.thermal = true;
           pushAlert({
             title: 'Instabilidade térmica alta',
@@ -1162,7 +1166,7 @@
             type: 'warning'
           });
         }
-        if (state.thermal < 50) {
+        if (state.thermal < THERMAL_RESET_THRESHOLD) {
           state.notices.thermal = false;
         }
         render();
