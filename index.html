@@ -7,7 +7,7 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
       :root {
-        font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         color: #1f2937;
         background: #f3f5f7;
       }
@@ -654,14 +654,15 @@
         km4: 0.45,
         km7: 0.55
       };
+      const DEFECT_LOSS_DB = 1.0;
       const DEFECT_EVENT = {
         id: 'defect',
         type: 'reflection',
         label: 'Bolha/impureza',
         km: 5.0,
         reflection: 1.2,
-        loss: 1.0,
-        postLoss: 1.0
+        loss: DEFECT_LOSS_DB,
+        postLoss: DEFECT_LOSS_DB
       };
       const SCENARIOS = [
         {
@@ -795,12 +796,17 @@
       const DISTANCE_STEP_KM = 0.1;
       const CHART_WIDTH = 680;
       const CHART_HEIGHT = 380;
-      const ALERT_AUTO_DISMISS_TIMEOUT_MS = 12000;
+      const ALERT_AUTO_DISMISS_DURATION_MS = 12000;
       const NOISE_FLOOR_DB = 0.5;
       const Y_AXIS_MIN_DB = 0;
       const Y_AXIS_MAX_DB = 10;
       const USABLE_SIGNAL_THRESHOLD_DB = 3.5;
       const REFLECTION_WINDOW_KM = 0.05;
+      const REFLECTION_SPIKE_PRE_OFFSET_KM = 0.02;
+      const REFLECTION_SPIKE_POST_OFFSET_KM = 0.04;
+      const DEFAULT_POST_REFLECTION_LOSS_DB = 0.3;
+      const MACROBEND_PROGRESSIVE_FACTOR = 0.35;
+      const FIBER_END_LOSS_RATE_DB_PER_KM = 2.2;
       const TENSION_ALERT_THRESHOLD = 70;
       const TENSION_RESET_THRESHOLD = 50;
       const THERMAL_ALERT_THRESHOLD = 70;
@@ -934,7 +940,7 @@
           }
 
           if (event.type === 'bend' && x >= event.km) {
-            y -= event.loss * (1 + (x - event.km) * 0.35);
+            y -= event.loss * (1 + (x - event.km) * MACROBEND_PROGRESSIVE_FACTOR);
           }
 
           if (event.type === 'reflection' && event.loss && x >= event.km) {
@@ -942,7 +948,7 @@
           }
 
           if (event.type === 'end' && x >= event.km) {
-            y -= event.loss + (x - event.km) * 2.2;
+            y -= event.loss + (x - event.km) * FIBER_END_LOSS_RATE_DB_PER_KM;
           }
         });
 
@@ -950,12 +956,15 @@
       }
 
       function addReflectionSpike(points, event) {
-        const preKm = Math.max(0, event.km - 0.02);
-        const postKm = Math.min(MAX_DISTANCE, event.km + 0.04);
+        const preKm = Math.max(0, event.km - REFLECTION_SPIKE_PRE_OFFSET_KM);
+        const postKm = Math.min(MAX_DISTANCE, event.km + REFLECTION_SPIKE_POST_OFFSET_KM);
         const baseBefore = computePowerAtDistance(preKm);
         points.push({ x: preKm, y: baseBefore });
         points.push({ x: event.km, y: baseBefore + event.reflection });
-        points.push({ x: postKm, y: baseBefore - (event.postLoss || event.loss || 0.3) });
+        points.push({
+          x: postKm,
+          y: baseBefore - (event.postLoss || event.loss || DEFAULT_POST_REFLECTION_LOSS_DB)
+        });
       }
 
       function generateTrace() {
@@ -1105,7 +1114,7 @@
           if (alert.isConnected) {
             alert.remove();
           }
-        }, ALERT_AUTO_DISMISS_TIMEOUT_MS);
+        }, ALERT_AUTO_DISMISS_DURATION_MS);
       }
 
       function render() {
