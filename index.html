@@ -806,11 +806,15 @@
       const REFLECTION_SPIKE_POST_OFFSET_KM = 0.04;
       const DEFAULT_POST_REFLECTION_LOSS_DB = 0.3;
       const MACROBEND_PROGRESSIVE_FACTOR = 0.35;
-      const FIBER_END_LOSS_RATE_dB_PER_KM = 2.2;
+      const FIBER_END_LOSS_RATE_DB_PER_KM = 2.2;
       const TENSION_ALERT_THRESHOLD = 70;
       const TENSION_RESET_THRESHOLD = 50;
       const THERMAL_ALERT_THRESHOLD = 70;
       const THERMAL_RESET_THRESHOLD = 50;
+      const QUICK_TIPS = [
+        'Compare o cenário base com variações de processo para entender o impacto na perda total.',
+        'Conectores sujos geram reflexões fortes logo no início da curva.'
+      ];
 
       const state = {
         scenarioId: 'baseline',
@@ -948,7 +952,7 @@
           }
 
           if (event.type === 'end' && x >= event.km) {
-            y -= event.loss + (x - event.km) * FIBER_END_LOSS_RATE_dB_PER_KM;
+            y -= event.loss + (x - event.km) * FIBER_END_LOSS_RATE_DB_PER_KM;
           }
         });
 
@@ -1207,9 +1211,10 @@
       });
 
       document.querySelector('#tipsButton').addEventListener('click', () => {
+        const tipsMessage = QUICK_TIPS.map((tip, index) => `${index + 1}) ${tip}`).join(' ');
         pushAlert({
           title: 'Dicas rápidas',
-          message: '1) Compare o cenário base com variações de processo para entender o impacto na perda total. 2) Conectores sujos geram reflexões fortes logo no início da curva.',
+          message: tipsMessage,
           type: 'info'
         });
       });
