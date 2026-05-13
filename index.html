@@ -156,6 +156,19 @@
         '1310': 0.9,
         '1550': 2.1
       };
+      const THERMAL_STEP_LOSS = {
+        km4: 0.45,
+        km7: 0.55
+      };
+      const DEFECT = {
+        reflectionBoost: 1.2,
+        postReflectionDrop: 1.0,
+        lossStartKm: 5.03,
+        baseSampleKm: 4.98,
+        preSpikeKm: 4.99,
+        spikeKm: 5.0,
+        dropKm: 5.03
+      };
       const MAX_DISTANCE = 10;
       const DISTANCE_STEP = 0.1;
       const DISTANCE_EPSILON = 0.0001;
@@ -220,11 +233,11 @@
         let y = 10 - baseSlope * x;
 
         if (x >= 4) {
-          y -= (state.thermal / 100) * 0.45;
+          y -= (state.thermal / 100) * THERMAL_STEP_LOSS.km4;
         }
 
         if (x >= 7) {
-          y -= (state.thermal / 100) * 0.55;
+          y -= (state.thermal / 100) * THERMAL_STEP_LOSS.km7;
         }
 
         if (x > 8) {
@@ -233,8 +246,8 @@
           y -= (state.tension / 100) * sensitivity * normalized * normalized;
         }
 
-        if (state.defect && x >= 5.03) {
-          y -= 1;
+        if (state.defect && x >= DEFECT.lossStartKm) {
+          y -= DEFECT.postReflectionDrop;
         }
 
         return y;
@@ -247,10 +260,10 @@
         }
 
         if (state.defect) {
-          const baseBeforeDefect = computePowerAtDistance(4.98);
-          points.push({ x: 4.99, y: baseBeforeDefect });
-          points.push({ x: 5.0, y: baseBeforeDefect + 1.2 });
-          points.push({ x: 5.03, y: baseBeforeDefect - 1.0 });
+          const baseBeforeDefect = computePowerAtDistance(DEFECT.baseSampleKm);
+          points.push({ x: DEFECT.preSpikeKm, y: baseBeforeDefect });
+          points.push({ x: DEFECT.spikeKm, y: baseBeforeDefect + DEFECT.reflectionBoost });
+          points.push({ x: DEFECT.dropKm, y: baseBeforeDefect - DEFECT.postReflectionDrop });
           points.sort((a, b) => a.x - b.x);
         }
 
