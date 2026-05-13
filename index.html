@@ -813,7 +813,9 @@
       const THERMAL_RESET_THRESHOLD = 50;
       const QUICK_TIPS = [
         'Compare o cenário base com variações de processo para entender o impacto na perda total.',
-        'Conectores sujos geram reflexões fortes logo no início da curva.'
+        'Conectores sujos geram reflexões fortes logo no início da curva.',
+        'Use 1310 nm para destacar perdas lineares e 1550 nm para macrocurvaturas.',
+        'Degraus de perda indicam emendas, splitters ou eventos localizados.'
       ];
 
       const state = {
@@ -1211,7 +1213,7 @@
       });
 
       document.querySelector('#tipsButton').addEventListener('click', () => {
-        const tipsMessage = QUICK_TIPS.map((tip, index) => `${index + 1}) ${tip}`).join(' ');
+        const tipsMessage = QUICK_TIPS.map((tip, index) => `${index + 1}) ${tip}`).join('<br>');
         pushAlert({
           title: 'Dicas rápidas',
           message: tipsMessage,
