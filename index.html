@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulador OTDR Interativo</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      :root {
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: whitesmoke;
+        color: black;
+      }
+
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      h1 {
+        margin-top: 0;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(260px, 320px) 1fr;
+        gap: 20px;
+      }
+
+      .panel,
+      .chart-panel {
+        background: white;
+        border: 1px solid lightgray;
+        border-radius: 10px;
+        padding: 16px;
+      }
+
+      .control {
+        margin-bottom: 18px;
+      }
+
+      .control label,
+      .control legend {
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      fieldset {
+        border: 1px solid silver;
+        border-radius: 8px;
+      }
+
+      .radio-group {
+        display: flex;
+        gap: 14px;
+        padding: 4px 0 0;
+      }
+
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      input[type='range'] {
+        width: 100%;
+      }
+
+      .value-badge {
+        min-width: 34px;
+        text-align: right;
+        font-weight: 700;
+      }
+
+      #summary {
+        margin-top: 14px;
+        line-height: 1.4;
+      }
+
+      .axis-label {
+        font-size: 12px;
+        fill: dimgray;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Simulador OTDR para Controle de Qualidade de Fibra</h1>
+      <div class="layout">
+        <section class="panel" aria-label="Controles de manufatura">
+          <div class="control">
+            <fieldset>
+              <legend>Comprimento de Onda</legend>
+              <div class="radio-group">
+                <label>
+                  <input type="radio" name="wavelength" value="1310" />
+                  1310 nm
+                </label>
+                <label>
+                  <input type="radio" name="wavelength" value="1550" checked />
+                  1550 nm
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="control">
+            <label for="tension">Tensão de Enrolamento</label>
+            <div class="slider-row">
+              <input id="tension" type="range" min="0" max="100" value="0" />
+              <span id="tensionValue" class="value-badge">0</span>
+            </div>
+          </div>
+
+          <div class="control">
+            <label for="thermal">Instabilidade Térmica da Torre</label>
+            <div class="slider-row">
+              <input id="thermal" type="range" min="0" max="100" value="0" />
+              <span id="thermalValue" class="value-badge">0</span>
+            </div>
+          </div>
+
+          <div class="control">
+            <label>
+              <input id="defect" type="checkbox" />
+              Inserir Bolha/Impureza no km 5
+            </label>
+          </div>
+        </section>
+
+        <section class="chart-panel">
+          <svg id="chart" role="img" aria-label="Traço OTDR"></svg>
+          <p id="summary"></p>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      const ATTENUATION_SLOPES = {
+        '1310': 0.35,
+        '1550': 0.2
+      };
+      const MACROBEND_SENSITIVITY = {
+        '1310': 0.9,
+        '1550': 2.1
+      };
+      const THERMAL_STEP_LOSS = {
+        km4: 0.45,
+        km7: 0.55
+      };
+      const DEFECT = {
+        reflectionBoost: 1.2,
+        postReflectionDrop: 1.0,
+        lossStartKm: 5.03,
+        baseSampleKm: 4.98,
+        preSpikeKm: 4.99,
+        spikeKm: 5.0,
+        dropKm: 5.03
+      };
+      const MAX_DISTANCE = 10;
+      const DISTANCE_STEP = 0.1;
+      const CHART_WIDTH = 620;
+      const CHART_HEIGHT = 360;
+
+      const state = {
+        wavelength: '1550',
+        tension: 0,
+        thermal: 0,
+        defect: false
+      };
+
+      const svg = d3
+        .select('#chart')
+        .attr('width', CHART_WIDTH)
+        .attr('height', CHART_HEIGHT);
+      svg.append('title').text('Traço OTDR de potência óptica por distância');
+
+      const margin = { top: 20, right: 20, bottom: 48, left: 58 };
+      const innerWidth = CHART_WIDTH - margin.left - margin.right;
+      const innerHeight = CHART_HEIGHT - margin.top - margin.bottom;
+
+      const g = svg
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const xScale = d3.scaleLinear().domain([0, MAX_DISTANCE]).range([0, innerWidth]);
+      const yScale = d3.scaleLinear().domain([4, 10]).range([innerHeight, 0]);
+
+      g
+        .append('g')
+        .attr('transform', `translate(0,${innerHeight})`)
+        .call(d3.axisBottom(xScale).ticks(10));
+
+      g.append('g').call(d3.axisLeft(yScale).ticks(7));
+
+      g.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', innerWidth / 2)
+        .attr('y', innerHeight + 38)
+        .attr('text-anchor', 'middle')
+        .text('Distância (km)');
+
+      g.append('text')
+        .attr('class', 'axis-label')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -innerHeight / 2)
+        .attr('y', -42)
+        .attr('text-anchor', 'middle')
+        .text('Potência Óptica (dB)');
+
+      const linePath = g
+        .append('path')
+        .attr('fill', 'none')
+        .attr('stroke', 'steelblue')
+        .attr('stroke-width', 2.6)
+        .attr('stroke-linejoin', 'round');
+
+      const line = d3
+        .line()
+        .x((d) => xScale(d.x))
+        .y((d) => yScale(d.y));
+
+      function computePowerAtDistance(x) {
+        const baseSlope = ATTENUATION_SLOPES[state.wavelength];
+        let y = 10 - baseSlope * x;
+
+        if (x >= 4) {
+          y -= (state.thermal / 100) * THERMAL_STEP_LOSS.km4;
+        }
+
+        if (x >= 7) {
+          y -= (state.thermal / 100) * THERMAL_STEP_LOSS.km7;
+        }
+
+        if (x > 8) {
+          const normalized = (x - 8) / 2;
+          const sensitivity = MACROBEND_SENSITIVITY[state.wavelength];
+          y -= (state.tension / 100) * sensitivity * normalized * normalized;
+        }
+
+        if (state.defect && x >= DEFECT.lossStartKm) {
+          y -= DEFECT.postReflectionDrop;
+        }
+
+        return y;
+      }
+
+      function generateTrace() {
+        const points = [];
+        const totalSteps = MAX_DISTANCE / DISTANCE_STEP;
+        for (let i = 0; i <= totalSteps; i += 1) {
+          const x = i * DISTANCE_STEP;
+          points.push({ x, y: computePowerAtDistance(x) });
+        }
+
+        if (state.defect) {
+          const baseBeforeDefect = computePowerAtDistance(DEFECT.baseSampleKm);
+          points.push({ x: DEFECT.preSpikeKm, y: baseBeforeDefect });
+          points.push({ x: DEFECT.spikeKm, y: baseBeforeDefect + DEFECT.reflectionBoost });
+          points.push({ x: DEFECT.dropKm, y: baseBeforeDefect - DEFECT.postReflectionDrop });
+          points.sort((a, b) => a.x - b.x);
+        }
+
+        return points;
+      }
+
+      function buildSummary() {
+        const wavelengthText =
+          state.wavelength === '1310'
+            ? '1310 nm selecionado: atenuação linear mais acentuada ao longo da fibra.'
+            : '1550 nm selecionado: atenuação linear mais suave, porém maior sensibilidade a macrocurvaturas.';
+
+        const tensionText =
+          state.tension === 0
+            ? 'Sem tensão de enrolamento adicional no carretel.'
+            : `Tensão em ${state.tension}: há penalidade progressiva entre km 8 e 10${
+                state.wavelength === '1550' ? ', com queda profunda típica em 1550 nm.' : '.'
+              }`;
+
+        const thermalText =
+          state.thermal === 0
+            ? 'Torre estável: sem perdas em degrau por oscilação térmica.'
+            : `Instabilidade térmica em ${state.thermal}: perdas em degrau visíveis próximas dos km 4 e 7.`;
+
+        const defectText = state.defect
+          ? 'Defeito ativado no km 5: pico refletivo seguido de queda abrupta de potência.'
+          : 'Sem bolha/impureza inserida no km 5.';
+
+        return `${wavelengthText} ${tensionText} ${thermalText} ${defectText}`;
+      }
+
+      function render() {
+        const data = generateTrace();
+        linePath.datum(data).attr('d', line);
+
+        d3.select('#summary').text(buildSummary());
+
+        d3.select('#tensionValue').text(state.tension);
+        d3.select('#thermalValue').text(state.thermal);
+      }
+
+      d3.selectAll('input[name="wavelength"]').on('change', (event) => {
+        state.wavelength = event.target.value;
+        render();
+      });
+
+      d3.select('#tension').on('input', (event) => {
+        state.tension = Number(event.target.value);
+        render();
+      });
+
+      d3.select('#thermal').on('input', (event) => {
+        state.thermal = Number(event.target.value);
+        render();
+      });
+
+      d3.select('#defect').on('change', (event) => {
+        state.defect = event.target.checked;
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>
