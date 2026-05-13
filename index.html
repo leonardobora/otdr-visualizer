@@ -171,7 +171,6 @@
       };
       const MAX_DISTANCE = 10;
       const DISTANCE_STEP = 0.1;
-      const DISTANCE_EPSILON = 0.0001;
       const CHART_WIDTH = 620;
       const CHART_HEIGHT = 360;
 
@@ -262,10 +261,10 @@
 
       function generateTrace() {
         const points = [];
-        const totalSteps = Math.round((MAX_DISTANCE + DISTANCE_EPSILON) / DISTANCE_STEP);
+        const totalSteps = Math.ceil(MAX_DISTANCE / DISTANCE_STEP);
         for (let i = 0; i <= totalSteps; i += 1) {
           const x = i * DISTANCE_STEP;
-          points.push({ x: Number(x.toFixed(2)), y: computePowerAtDistance(x) });
+          points.push({ x, y: computePowerAtDistance(x) });
         }
 
         if (state.defect) {
