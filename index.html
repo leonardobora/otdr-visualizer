@@ -797,16 +797,16 @@
       const CHART_WIDTH = 680;
       const CHART_HEIGHT = 380;
       const ALERT_AUTO_DISMISS_DURATION_MS = 12000;
-      const NOISE_FLOOR_DB = 0.5;
       const Y_AXIS_MIN_DB = 0;
       const Y_AXIS_MAX_DB = 10;
+      const MIN_SIGNAL_DB = Y_AXIS_MIN_DB;
       const USABLE_SIGNAL_THRESHOLD_DB = 3.5;
       const REFLECTION_WINDOW_KM = 0.05;
       const REFLECTION_SPIKE_PRE_OFFSET_KM = 0.02;
       const REFLECTION_SPIKE_POST_OFFSET_KM = 0.04;
       const DEFAULT_POST_REFLECTION_LOSS_DB = 0.3;
       const MACROBEND_PROGRESSIVE_FACTOR = 0.35;
-      const FIBER_END_LOSS_RATE_DB_PER_KM = 2.2;
+      const FIBER_END_LOSS_RATE_dB_PER_KM = 2.2;
       const TENSION_ALERT_THRESHOLD = 70;
       const TENSION_RESET_THRESHOLD = 50;
       const THERMAL_ALERT_THRESHOLD = 70;
@@ -948,11 +948,11 @@
           }
 
           if (event.type === 'end' && x >= event.km) {
-            y -= event.loss + (x - event.km) * FIBER_END_LOSS_RATE_DB_PER_KM;
+            y -= event.loss + (x - event.km) * FIBER_END_LOSS_RATE_dB_PER_KM;
           }
         });
 
-        return Math.max(NOISE_FLOOR_DB, y);
+        return Math.max(MIN_SIGNAL_DB, y);
       }
 
       function addReflectionSpike(points, event) {
@@ -1208,13 +1208,8 @@
 
       document.querySelector('#tipsButton').addEventListener('click', () => {
         pushAlert({
-          title: 'Dica rápida',
-          message: 'Compare o cenário base com variações de processo para entender o impacto na perda total.',
-          type: 'info'
-        });
-        pushAlert({
-          title: 'Dica rápida',
-          message: 'Conectores sujos geram reflexões fortes logo no início da curva.',
+          title: 'Dicas rápidas',
+          message: '1) Compare o cenário base com variações de processo para entender o impacto na perda total. 2) Conectores sujos geram reflexões fortes logo no início da curva.',
           type: 'info'
         });
       });
