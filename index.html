@@ -792,11 +792,13 @@
         }
       ];
       const MAX_DISTANCE = 10;
-      const DISTANCE_STEP = 0.05;
+      const DISTANCE_STEP_KM = 0.1;
       const CHART_WIDTH = 680;
       const CHART_HEIGHT = 380;
-      const ALERT_TIMEOUT_MS = 12000;
-      const NOISE_FLOOR = 0.5;
+      const ALERT_AUTO_DISMISS_TIMEOUT_MS = 12000;
+      const NOISE_FLOOR_DB = 0.5;
+      const Y_AXIS_MIN_DB = 0;
+      const Y_AXIS_MAX_DB = 10;
       const USABLE_SIGNAL_THRESHOLD_DB = 3.5;
       const REFLECTION_WINDOW_KM = 0.05;
       const TENSION_ALERT_THRESHOLD = 70;
@@ -851,7 +853,7 @@
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
       const xScale = d3.scaleLinear().domain([0, MAX_DISTANCE]).range([0, innerWidth]);
-      const yScale = d3.scaleLinear().domain([0, 10]).range([innerHeight, 0]);
+      const yScale = d3.scaleLinear().domain([Y_AXIS_MIN_DB, Y_AXIS_MAX_DB]).range([innerHeight, 0]);
 
       g
         .append('g')
@@ -944,7 +946,7 @@
           }
         });
 
-        return Math.max(NOISE_FLOOR, y);
+        return Math.max(NOISE_FLOOR_DB, y);
       }
 
       function addReflectionSpike(points, event) {
@@ -958,9 +960,9 @@
 
       function generateTrace() {
         const points = [];
-        const totalSteps = MAX_DISTANCE / DISTANCE_STEP;
+        const totalSteps = MAX_DISTANCE / DISTANCE_STEP_KM;
         for (let i = 0; i <= totalSteps; i += 1) {
-          const x = Number((i * DISTANCE_STEP).toFixed(2));
+          const x = Number((i * DISTANCE_STEP_KM).toFixed(2));
           points.push({ x, y: computePowerAtDistance(x) });
         }
 
@@ -1103,7 +1105,7 @@
           if (alert.isConnected) {
             alert.remove();
           }
-        }, ALERT_TIMEOUT_MS);
+        }, ALERT_AUTO_DISMISS_TIMEOUT_MS);
       }
 
       function render() {
