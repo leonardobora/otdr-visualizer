@@ -148,6 +148,18 @@
     </div>
 
     <script>
+      const ATTENUATION_SLOPES = {
+        '1310': 0.35,
+        '1550': 0.2
+      };
+      const MACROBEND_SENSITIVITY = {
+        '1310': 0.9,
+        '1550': 2.1
+      };
+      const MAX_DISTANCE = 10;
+      const DISTANCE_STEP = 0.1;
+      const DISTANCE_EPSILON = 0.0001;
+
       const state = {
         wavelength: '1550',
         tension: 0,
@@ -166,7 +178,7 @@
         .append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-      const xScale = d3.scaleLinear().domain([0, 10]).range([0, innerWidth]);
+      const xScale = d3.scaleLinear().domain([0, MAX_DISTANCE]).range([0, innerWidth]);
       const yScale = d3.scaleLinear().domain([4, 10]).range([innerHeight, 0]);
 
       const xAxisGroup = g
@@ -204,7 +216,7 @@
         .y((d) => yScale(d.y));
 
       function computePowerAtDistance(x) {
-        const baseSlope = state.wavelength === '1310' ? 0.35 : 0.2;
+        const baseSlope = ATTENUATION_SLOPES[state.wavelength];
         let y = 10 - baseSlope * x;
 
         if (x >= 4) {
@@ -217,7 +229,7 @@
 
         if (x > 8) {
           const normalized = (x - 8) / 2;
-          const sensitivity = state.wavelength === '1550' ? 2.1 : 0.9;
+          const sensitivity = MACROBEND_SENSITIVITY[state.wavelength];
           y -= (state.tension / 100) * sensitivity * normalized * normalized;
         }
 
@@ -230,7 +242,7 @@
 
       function generateTrace() {
         const points = [];
-        for (let x = 0; x <= 10.0001; x += 0.1) {
+        for (let x = 0; x <= MAX_DISTANCE + DISTANCE_EPSILON; x += DISTANCE_STEP) {
           points.push({ x: Number(x.toFixed(2)), y: computePowerAtDistance(x) });
         }
 
