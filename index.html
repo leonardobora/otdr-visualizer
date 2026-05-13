@@ -141,7 +141,7 @@
         </section>
 
         <section class="chart-panel">
-          <svg id="chart" width="620" height="360" role="img" aria-label="Traço OTDR"></svg>
+          <svg id="chart" role="img" aria-label="Traço OTDR"></svg>
           <p id="summary"></p>
         </section>
       </div>
@@ -172,6 +172,8 @@
       const MAX_DISTANCE = 10;
       const DISTANCE_STEP = 0.1;
       const DISTANCE_EPSILON = 0.0001;
+      const CHART_WIDTH = 620;
+      const CHART_HEIGHT = 360;
 
       const state = {
         wavelength: '1550',
@@ -180,9 +182,14 @@
         defect: false
       };
 
-      const svg = d3.select('#chart');
-      const width = Number(svg.attr('width'));
-      const height = Number(svg.attr('height'));
+      const svg = d3
+        .select('#chart')
+        .attr('width', CHART_WIDTH)
+        .attr('height', CHART_HEIGHT);
+      svg.append('title').text('Traço OTDR de potência óptica por distância');
+
+      const width = CHART_WIDTH;
+      const height = CHART_HEIGHT;
       const margin = { top: 20, right: 20, bottom: 48, left: 58 };
       const innerWidth = width - margin.left - margin.right;
       const innerHeight = height - margin.top - margin.bottom;
@@ -255,7 +262,9 @@
 
       function generateTrace() {
         const points = [];
-        for (let x = 0; x <= MAX_DISTANCE + DISTANCE_EPSILON; x += DISTANCE_STEP) {
+        const totalSteps = Math.round((MAX_DISTANCE + DISTANCE_EPSILON) / DISTANCE_STEP);
+        for (let i = 0; i <= totalSteps; i += 1) {
+          const x = i * DISTANCE_STEP;
           points.push({ x: Number(x.toFixed(2)), y: computePowerAtDistance(x) });
         }
 
